@@ -106,6 +106,8 @@ class SignupPage(webapp2.RequestHandler):
         verify = self.request.get("verify")
         email = self.request.get("email")
 
+        params = dict(username=username, email=email)
+
         #if the user typed a bad username, redirect and yell at them
         # if the user typed a bad password, redirect and yell at them
         # if the user's password and verify password do not match, redirect and yell at them
