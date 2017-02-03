@@ -112,19 +112,25 @@ class SignupPage(webapp2.RequestHandler):
         # if the user typed a bad password, redirect and yell at them
         # if the user's password and verify password do not match, redirect and yell at them
         #if the user typed a bad email, redirect and yell at them
-        if valid_username(username) and valid_password(password, verify) and valid_verify(password, verify) and valid_email(email):
-            self.redirect('/success?username=' + username)
-        else:
-            if not valid_username(username):
-                user_err = "Invalid username".format(username)
-            if not valid_password(password, verify):
-                password_err = "Invalid password".format(password)
-            if not valid_verify(password, verify):
-                verify_err = "Your passwords did not match".format(verify)
-            if not valid_email(email):
-                email_err = "Invalid email".format(email)
+        if not valid_username(username):
+            params["error_username"] = username + " is not a valid username."
+            have_error = True
 
-            self.response.out.write(content)
+        if not valid_password(password):
+            params["error_password"] = "Invalid password"
+            have_error = True
+        elif password != verify:
+            params["error_verify"] = "Passwords did not match"
+            have_error = True
+
+        if not valid_email(email):
+            params["error_email"] = "Invalid email"
+            have_error = True
+
+        if have_error:
+            self.response.out.write(content, **params)
+        else:
+            self.redirect('/success?username=' + username)
 
 
 class Success(webapp2.RequestHandler):
