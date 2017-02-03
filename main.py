@@ -75,32 +75,24 @@ header = "<h1>Signup</h1>"
 main_content = header + form
 content = page_header + main_content + page_footer
 
+USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 def valid_username(username):
-    USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
-    return USER_RE.match(username)
+    return username and USER_RE.match(username)
 
-def valid_password(password1, password2):
-    PASS_RE = re.compile("^.{3,20}$")
-    return PASS_RE.match(password1)
+PASS_RE = re.compile("^.{3,20}$")
+def valid_password(password):
+    return password and PASS_RE.match(password)
 
-def valid_verify(password1, password2):
-    PASS_RE = re.compile("^.{3,20}$")
-    if password1 == password2 and PASS_RE.match(password2):
-        return True
-    return False
-
+EMAIL_RE = re.compile("^[\S]+@[\S]+\.[\S]+$")
 def valid_email(email):
-    EMAIL_RE = re.compile("^[\S]+@[\S]+\.[\S]+$")
-    if EMAIL_RE.match(email) or email == "":
-        return True
-    return False
+    return not email or EMAIL_RE.match(email)
 
 def escape_html(s):
     return cgi.escape(s, quote = True)
 
 
-class MainPage(webapp2.RequestHandler):
-    """Handles requests coming in to '/verify'
+class SignupPage(webapp2.RequestHandler):
+    """Handles requests coming in to '/'
     """
 
     def get (self):
@@ -108,10 +100,7 @@ class MainPage(webapp2.RequestHandler):
 
     def post(self):
         # look inside the request to figure out what the user typed
-        user_err=""
-        password_err=""
-        verify_err=""
-        email_err=""
+        have_error = False
         username = self.request.get("username")
         password = self.request.get("password")
         verify = self.request.get("verify")
@@ -136,7 +125,7 @@ class MainPage(webapp2.RequestHandler):
             self.response.out.write(content)
 
 
-class SuccessHandler(webapp2.RequestHandler):
+class Success(webapp2.RequestHandler):
     """Returns response for a successful Successful Signup"""
     def get(self):
         # build response content
@@ -147,6 +136,6 @@ class SuccessHandler(webapp2.RequestHandler):
         self.response.out.write(content)
 
 app = webapp2.WSGIApplication([
-    ('/success', SuccessHandler),
-    ('/.*', MainPage)
+    ('/success', Success),
+    ('/.*', SignupPage)
 ], debug=True)
