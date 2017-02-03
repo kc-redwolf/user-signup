@@ -46,7 +46,7 @@ form = """
                 <td>
                     <input name="username" type="text" value="" required>
                 </td>
-                <td><span class="error">user_err</span>
+                <td><span class="error" name="user_err" value=%s></span>
                 </td>
             </tr>
             <tr>
@@ -56,7 +56,7 @@ form = """
                 <td>
                     <input type="password" name="password" value="" required>
                 </td>
-                <td><span class="error">password_err</span></td>
+                <td><span class="error" name="password_err" value=""></span></td>
             </tr>
             <tr>
                 <td>
@@ -65,7 +65,7 @@ form = """
                 <td>
                     <input type="password" name="verify" required>
                 </td>
-                <td><span class="error">verify_err</span>
+                <td><span class="error" name="verify_err" value=""></span>
                 </td>
             </tr>
             <tr>
@@ -75,7 +75,7 @@ form = """
                 <td>
                     <input type="email" name="email" value="">
                 </td>
-                <td><span class="error">email_err</span>
+                <td><span class="error" name="email_err" value=""></span>
                 </td>
             </tr>
         </table>
@@ -90,11 +90,13 @@ page_footer = """
 """
 
 header = "<h1>Signup</h1>"
+
 main_content = header + form
 content = page_header + main_content + page_footer
 
 def escape_html(s):
     return cgi.escape(s, quote = True)
+
 
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 PASS_RE = re.compile("^.{3,20}$")
@@ -141,13 +143,13 @@ class MainPage(webapp2.RequestHandler):
             if not valid_username(username):
                 user_err = "Invalid username".format(username)
             if not valid_password(password, verify):
-                password_err = "Invalid password".format(password)
+                password_err = "Invalid password"
             if not valid_verify(password, verify):
-                verify_err = "Your passwords did not match".format(verify)
+                verify_err = "Your passwords did not match"
             if not valid_email(email):
-                email_err = "Invalid email".format(email)
-            err_content = (content + username + user_err + password_err + verify_err + email + email_err)
-            self.response.out.write(err_content)
+                email_err = "Invalid email"
+
+            self.response.out.write(content)
 
 
 class SuccessHandler(webapp2.RequestHandler):
