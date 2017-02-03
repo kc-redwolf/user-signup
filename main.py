@@ -40,43 +40,24 @@ form = """
     <form method='post'>
         <table>
             <tr>
-                <td>
-                <label for="username">Username</label>
-                </td>
-                <td>
-                    <input name="username" type="text" value="" required>
-                </td>
-                <td><span class="error" name="user_err" value=%s></span>
-                </td>
+                <td class="label">Username</td>
+                <td><input type="text" name="username" value="{{username}}"></td>
+                <td class="error">{{error_username}}</td>
             </tr>
             <tr>
-                <td>
-                <label for="password">Password</label>
-                </td>
-                <td>
-                    <input type="password" name="password" value="" required>
-                </td>
-                <td><span class="error" name="password_err" value=""></span></td>
+                <td class="label">Password</td>
+                <td><input type="password" name="password" value=""></td>
+                <td class="error">{{error_password}}</td>
             </tr>
             <tr>
-                <td>
-                <label for="verify">Verify Password</label>
-                </td>
-                <td>
-                    <input type="password" name="verify" required>
-                </td>
-                <td><span class="error" name="verify_err" value=""></span>
-                </td>
+                <td class="label">Verify Password</td>
+                <td><input type="password" name="verify" value=""></td>
+                <td class="error">{{error_verify}}</td>
             </tr>
             <tr>
-                <td>
-                <label for="email">Email (optional)</label>
-                </td>
-                <td>
-                    <input type="email" name="email" value="">
-                </td>
-                <td><span class="error" name="email_err" value=""></span>
-                </td>
+                <td class="label">Email (optional)</td>
+                <td><input type="text" name="email" value="{{email}}"></td>
+                <td class="error">{{error_email}}</td>
             </tr>
         </table>
         <input type="submit">
@@ -94,32 +75,35 @@ header = "<h1>Signup</h1>"
 main_content = header + form
 content = page_header + main_content + page_footer
 
-def escape_html(s):
-    return cgi.escape(s, quote = True)
-
-
-USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
-PASS_RE = re.compile("^.{3,20}$")
-EMAIL_RE = re.compile("^[\S]+@[\S]+\.[\S]+$")
-
 def valid_username(username):
+    USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
     return USER_RE.match(username)
+
 def valid_password(password1, password2):
+    PASS_RE = re.compile("^.{3,20}$")
     return PASS_RE.match(password1)
+
 def valid_verify(password1, password2):
+    PASS_RE = re.compile("^.{3,20}$")
     if password1 == password2 and PASS_RE.match(password2):
         return True
     return False
+
 def valid_email(email):
+    EMAIL_RE = re.compile("^[\S]+@[\S]+\.[\S]+$")
     if EMAIL_RE.match(email) or email == "":
         return True
     return False
 
+def escape_html(s):
+    return cgi.escape(s, quote = True)
+
+
 class MainPage(webapp2.RequestHandler):
     """Handles requests coming in to '/verify'
     """
-    def get (self):
 
+    def get (self):
         self.response.write(content)
 
     def post(self):
@@ -143,11 +127,11 @@ class MainPage(webapp2.RequestHandler):
             if not valid_username(username):
                 user_err = "Invalid username".format(username)
             if not valid_password(password, verify):
-                password_err = "Invalid password"
+                password_err = "Invalid password".format(password)
             if not valid_verify(password, verify):
-                verify_err = "Your passwords did not match"
+                verify_err = "Your passwords did not match".format(verify)
             if not valid_email(email):
-                email_err = "Invalid email"
+                email_err = "Invalid email".format(email)
 
             self.response.out.write(content)
 
