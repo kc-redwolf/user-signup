@@ -39,11 +39,11 @@ page_header = """
 """
 
 form = """
-    <form method='post' autocomplete="on">
+    <form method='post'>
         <table>
             <tr>
                 <td class="label">Username</td>
-                <td><input type="text" name="username" value=""/></td>
+                <td><input type="text" name="username" value="" autocomplete="on"/></td>
                 <td class="error">%(error_username)s</td>
             </tr>
             <tr>
@@ -58,7 +58,7 @@ form = """
             </tr>
             <tr>
                 <td class="label">Email (optional)</td>
-                <td><input type="text" name="email" value="" /></td>
+                <td><input type="text" name="email" value="" autocomplete="on"/></td>
                 <td class="error">%(error_email)s</td>
             </tr>
         </table>
