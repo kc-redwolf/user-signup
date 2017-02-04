@@ -17,6 +17,8 @@
 import webapp2
 import cgi
 import re
+import sys
+
 
 # html boilerplate for the top of every page
 page_header = """
@@ -37,30 +39,30 @@ page_header = """
 """
 
 form = """
-    <form method='post'>
+    <form method='post' autocomplete="on">
         <table>
             <tr>
                 <td class="label">Username</td>
-                <td><input type="text" name="username" value="{{username}}"></td>
-                <td class="error">{{error_username}}</td>
+                <td><input type="text" name="username" value=""/></td>
+                <td class="error">%(error_username)s</td>
             </tr>
             <tr>
                 <td class="label">Password</td>
-                <td><input type="password" name="password" value=""></td>
-                <td class="error">{{error_password}}</td>
+                <td><input type="password" name="password" value="" /></td>
+                <td class="error">%(error_password)s</td>
             </tr>
             <tr>
                 <td class="label">Verify Password</td>
-                <td><input type="password" name="verify" value=""></td>
-                <td class="error">{{error_verify}}</td>
+                <td><input type="password" name="verify" value="" /></td>
+                <td class="error">%(error_verify)s</td>
             </tr>
             <tr>
                 <td class="label">Email (optional)</td>
-                <td><input type="text" name="email" value="{{email}}"></td>
-                <td class="error">{{error_email}}</td>
+                <td><input type="text" name="email" value="" /></td>
+                <td class="error">%(error_email)s</td>
             </tr>
         </table>
-        <input type="submit">
+        <input type="submit" value="SUBMIT"/>
     </form>
 """
 
@@ -79,23 +81,25 @@ USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 def valid_username(username):
     return username and USER_RE.match(username)
 
-PASS_RE = re.compile("^.{3,20}$")
+PASS_RE = re.compile(r"^.{3,20}$")
 def valid_password(password):
     return password and PASS_RE.match(password)
 
-EMAIL_RE = re.compile("^[\S]+@[\S]+\.[\S]+$")
-def valid_email(email):
-    return not email or EMAIL_RE.match(email)
+def valid_verify(password,verify):
+    if password != verify:
+        return False
+    else:
+        return True
 
-def escape_html(s):
-    return cgi.escape(s, quote = True)
+EMAIL_RE = re.compile(r"^[\S]+@+[\S]+\[.]+[\S]+$")
+def valid_email(email):
+    return email and EMAIL_RE.match(email)
 
 
 class SignupPage(webapp2.RequestHandler):
     """Handles requests coming in to '/'
     """
-
-    def get (self):
+    def get(self):
         self.response.write(content)
 
     def post(self):
@@ -106,31 +110,32 @@ class SignupPage(webapp2.RequestHandler):
         verify = self.request.get("verify")
         email = self.request.get("email")
 
-        params = dict(username=username, email=email)
+        if valid_username(username) and valid_password(password) and valid_email(email) and valid_verify(password,verify):
+            self.redirect('/success?username=' + username)
 
         #if the user typed a bad username, redirect and yell at them
         # if the user typed a bad password, redirect and yell at them
         # if the user's password and verify password do not match, redirect and yell at them
         #if the user typed a bad email, redirect and yell at them
+
         if not valid_username(username):
-            params["error_username"] = username + " is not a valid username."
+            error_username = username + " is not a valid username."
             have_error = True
 
         if not valid_password(password):
-            params["error_password"] = "Invalid password"
+            error_password = "Invalid password"
             have_error = True
-        elif password != verify:
-            params["error_verify"] = "Passwords did not match"
+        if password != verify:
+            error_verify = "Passwords did not match"
             have_error = True
 
         if not valid_email(email):
-            params["error_email"] = "Invalid email"
+            error_email = "Invalid email"
             have_error = True
 
         if have_error:
-            self.response.out.write(content, **params)
-        else:
-            self.redirect('/success?username=' + username)
+            self.response.out.write(content)
+
 
 
 class Success(webapp2.RequestHandler):
